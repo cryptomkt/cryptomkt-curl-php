@@ -1,15 +1,18 @@
 {
-    "name": "php-curl-class/php-curl-class",
-    "description": "PHP Curl Class makes it easy to send HTTP requests and integrate with web APIs.",
-    "homepage": "https://github.com/php-curl-class/php-curl-class",
-    "license": "Unlicense",
+    "name": "cryptomkt/cryptomkt-curl-php",
+    "description": "CryptoMarket Curl PHP makes it easy integrate with CryptoMarket APIs.",
+    "homepage": "https://github.com/cryptomkt/cryptomkt-curl-php",
+    "license": "MIT",
+    "typw": "git",
     "keywords": [
-        "php", "curl", "class", "api", "client", "framework", "http client",
-        "http", "json", "requests", "rest", "restful", "web service", "xml"
+        "php", "curl", "class", "cryptomarket", "cryptocompra", "ethereum", "stellar",
+        "lumen", "bitcoin", "altcoins", "cryptocurrencies", "payment"
     ],
     "authors": [
         {
-            "name": "Zach Borboa"
+            "name": "CryptoMarket Development Team",
+            "email": "support@cryptomkt.com",
+            "homepage": "https://soporte.cryptomkt.com/"
         }
     ],
     "require": {
@@ -17,14 +20,20 @@
         "ext-curl": "*",
         "ext-mbstring": "*"
     },
-    "require-dev": {
-        "ext-gd": "*",
-        "phpunit/phpunit": "*",
-        "squizlabs/php_codesniffer": "*"
-    },
     "autoload": {
         "psr-4": {
-            "Curl\\": "src/Curl/"
+            "Cryptomkt\\": "src/Cryptomkt/"
+        }
+    },
+    "support": {
+        "email": "support@cryptomkt.com",
+        "issues": "https://github.com/cryptomkt/cryptomkt-curl-php/issues",
+        "source": "https://github.com/cryptomkt/cryptomkt-curl-php"
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1-dev"
         }
     }
 }

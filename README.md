@@ -1,357 +1,186 @@
-# PHP Curl Class: HTTP requests made easy
+# CryptoMarket API v1 PHP Client
+[![N|CryptoMarket](https://www.cryptomkt.com/static/principal/img/logotipo-bld.png)](https://www.cryptomkt.com/)
 
-[![](https://img.shields.io/github/release/php-curl-class/php-curl-class.svg)](https://github.com/php-curl-class/php-curl-class/releases/)
-[![](https://img.shields.io/github/license/php-curl-class/php-curl-class.svg)](https://github.com/php-curl-class/php-curl-class/blob/master/LICENSE)
-[![](https://img.shields.io/travis/php-curl-class/php-curl-class.svg)](https://travis-ci.org/php-curl-class/php-curl-class/)
-[![](https://img.shields.io/packagist/dt/php-curl-class/php-curl-class.svg)](https://github.com/php-curl-class/php-curl-class/releases/)
+PHP library [CryptoMarket API v1][1] to integrate CryptoMarket API into your
+PHP project.
 
-PHP Curl Class makes it easy to send HTTP requests and integrate with web APIs.
+## Installation
 
-![PHP Curl Class screencast](www/img/screencast.gif)
+This library could be installed using Composer. Please read the [Composer Documentation](https://getcomposer.org/doc/01-basic-usage.md).
 
----
-
-- [Installation](#installation)
-- [Requirements](#requirements)
-- [Quick Start and Examples](#quick-start-and-examples)
-- [Available Methods](#available-methods)
-- [Security](#security)
-- [Troubleshooting](#troubleshooting)
-- [Run Tests](#run-tests)
-- [Contribute](#contribute)
-
----
-
-### Installation
-
-To install PHP Curl Class, simply:
-
-    $ composer require php-curl-class/php-curl-class
-
-For latest commit version:
-
-    $ composer require php-curl-class/php-curl-class @dev
-
-### Requirements
-
-PHP Curl Class works with PHP 5.3, 5.4, 5.5, 5.6, 7.0, 7.1, 7.2, and HHVM.
-
-### Quick Start and Examples
-
-More examples are available under [/examples](https://github.com/php-curl-class/php-curl-class/tree/master/examples).
-
-```php
-require __DIR__ . '/vendor/autoload.php';
-
-use \Curl\Curl;
-
-$curl = new Curl();
-$curl->get('https://www.example.com/');
-
-if ($curl->error) {
-    echo 'Error: ' . $curl->errorCode . ': ' . $curl->errorMessage . "\n";
-} else {
-    echo 'Response:' . "\n";
-    var_dump($curl->response);
+```json
+"require": {
+    "cryptomkt/cryptomkt-curl-php": "dev-master"
 }
 ```
 
-```php
-// https://www.example.com/search?q=keyword
-$curl = new Curl();
-$curl->get('https://www.example.com/search', array(
-    'q' => 'keyword',
-));
-```
+## Authentication
+
+### API Key
+
+Use an API key and secret to access your own Crypto Market account.
 
 ```php
-$curl = new Curl();
-$curl->post('https://www.example.com/login/', array(
-    'username' => 'myusername',
-    'password' => 'mypassword',
-));
+use Cryptomkt\Client;
+use Cryptomkt\Configuration;
+
+$configuration = Configuration::apiKey($apiKey, $apiSecret);
+$client = Client::create($configuration);
 ```
+
+### Warnings
+
+This library will log all warnings to a
+standard PSR-3 logger if one is configured.
 
 ```php
-$curl = new Curl();
-$curl->setBasicAuthentication('username', 'password');
-$curl->setUserAgent('MyUserAgent/0.0.1 (+https://www.example.com/bot.html)');
-$curl->setReferrer('https://www.example.com/url?url=https%3A%2F%2Fwww.example.com%2F');
-$curl->setHeader('X-Requested-With', 'XMLHttpRequest');
-$curl->setCookie('key', 'value');
-$curl->get('https://www.example.com/');
+use Cryptomkt\Client;
+use Cryptomkt\Configuration;
 
-if ($curl->error) {
-    echo 'Error: ' . $curl->errorCode . ': ' . $curl->errorMessage . "\n";
-} else {
-    echo 'Response:' . "\n";
-    var_dump($curl->response);
-}
-
-var_dump($curl->requestHeaders);
-var_dump($curl->responseHeaders);
+$configuration = Configuration::apiKey($apiKey, $apiSecret);
+$configuration->setLogger($logger);
+$client = Client::create($configuration);
 ```
+
+### Responses
+
+Each resource object has a `getRawData()` method which you can use to access any field that
+are not mapped to the object properties.
 
 ```php
-$curl = new Curl();
-$curl->setOpt(CURLOPT_FOLLOWLOCATION, true);
-$curl->get('https://shortn.example.com/bHbVsP');
+$data = $markets->getRawData();
 ```
+
+Raw data from the last HTTP response is also available on the client object.
 
 ```php
-$curl = new Curl();
-$curl->put('https://api.example.com/user/', array(
-    'first_name' => 'Zach',
-    'last_name' => 'Borboa',
-));
+$data = $client->decodeLastResponse();
 ```
+
+## Usage
+
+For more references, go to the [official documentation](https://developers.cryptomkt.com/).
+
+### Market Data
+
+**List markets**
 
 ```php
-$curl = new Curl();
-$curl->patch('https://api.example.com/profile/', array(
-    'image' => '@path/to/file.jpg',
-));
+$markets = $client->getMarkets();
 ```
+
+**Get ticker**
 
 ```php
-$curl = new Curl();
-$curl->patch('https://api.example.com/profile/', array(
-    'image' => new CURLFile('path/to/file.jpg'),
-));
+$arguments = array('market' => 'ETHARS');
+$ticker = $client->getTicker($arguments);
 ```
+
+**Get trades**
 
 ```php
-$curl = new Curl();
-$curl->delete('https://api.example.com/user/', array(
-    'id' => '1234',
-));
+$arguments = array('market' => 'ETHCLP','start' => '2017-05-20', 'end' => '2017-05-30', 'page' => 1);
+$trades = $client->getTrades($arguments);
 ```
+
+### Orders
+
+**Get orders**
 
 ```php
-// Enable all supported encoding types and download a file.
-$curl = new Curl();
-$curl->setOpt(CURLOPT_ENCODING , '');
-$curl->download('https://www.example.com/file.bin', '/tmp/myfile.bin');
+$arguments = array('market' => 'ETHARS','type' => 'buy', 'page' => 1);
+$orders = $client->getOrders($arguments);
 ```
+
+**Get order**
 
 ```php
-// Case-insensitive access to headers.
-$curl = new Curl();
-$curl->download('https://www.example.com/image.png', '/tmp/myimage.png');
-echo $curl->responseHeaders['Content-Type'] . "\n"; // image/png
-echo $curl->responseHeaders['CoNTeNT-TyPE'] . "\n"; // image/png
+$arguments = array('id' => 'M107435');
+$order = $client->getOrder($arguments);  
 ```
+
+**Get active orders**
 
 ```php
-// Clean up.
-$curl->close();
+$arguments = array('market' => 'ETHCLP', 'page' => 0);
+$active_orders = $client->getActiveOrders($arguments);
 ```
+
+**Get executed orders**
 
 ```php
-// Example access to curl object.
-curl_set_opt($curl->curl, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1');
-curl_close($curl->curl);
+$arguments = array('market' => 'ETHCLP', 'page' => 0);
+var_dump($client->getExecutedOrders($arguments));
 ```
+
+**Create order**
 
 ```php
-require __DIR__ . '/vendor/autoload.php';
-
-use \Curl\MultiCurl;
-
-// Requests in parallel with callback functions.
-$multi_curl = new MultiCurl();
-
-$multi_curl->success(function($instance) {
-    echo 'call to "' . $instance->url . '" was successful.' . "\n";
-    echo 'response:' . "\n";
-    var_dump($instance->response);
-});
-$multi_curl->error(function($instance) {
-    echo 'call to "' . $instance->url . '" was unsuccessful.' . "\n";
-    echo 'error code: ' . $instance->errorCode . "\n";
-    echo 'error message: ' . $instance->errorMessage . "\n";
-});
-$multi_curl->complete(function($instance) {
-    echo 'call completed' . "\n";
-});
-
-$multi_curl->addGet('https://www.google.com/search', array(
-    'q' => 'hello world',
-));
-$multi_curl->addGet('https://duckduckgo.com/', array(
-    'q' => 'hello world',
-));
-$multi_curl->addGet('https://www.bing.com/search', array(
-    'q' => 'hello world',
-));
-
-$multi_curl->start(); // Blocks until all items in the queue have been processed.
+$arguments = array(
+        'amount' => '0.3',
+        'market' => 'ethclp',
+        'price' => '200000',
+        'type' => 'sell'
+    );
+$response = $client->createOrder($arguments);
 ```
 
-More examples are available under [/examples](https://github.com/php-curl-class/php-curl-class/tree/master/examples).
+**Cancel order**
 
-### Available Methods
 ```php
-Curl::__construct($base_url = null)
-Curl::__destruct()
-Curl::__get($name)
-Curl::attemptRetry()
-Curl::beforeSend($callback)
-Curl::buildPostData($data)
-Curl::call()
-Curl::close()
-Curl::complete($callback)
-Curl::delete($url, $query_parameters = array(), $data = array())
-Curl::download($url, $mixed_filename)
-Curl::error($callback)
-Curl::exec($ch = null)
-Curl::execDone()
-Curl::get($url, $data = array())
-Curl::getAttempts()
-Curl::getBeforeSendCallback()
-Curl::getCompleteCallback()
-Curl::getCookie($key)
-Curl::getCurl()
-Curl::getCurlErrorCode()
-Curl::getCurlErrorMessage()
-Curl::getDownloadCompleteCallback()
-Curl::getErrorCallback()
-Curl::getErrorCode()
-Curl::getErrorMessage()
-Curl::getFileHandle()
-Curl::getHttpErrorMessage()
-Curl::getHttpStatusCode()
-Curl::getId()
-Curl::getInfo($opt = null)
-Curl::getJsonDecoder()
-Curl::getOpt($option)
-Curl::getRawResponse()
-Curl::getRawResponseHeaders()
-Curl::getRemainingRetries()
-Curl::getRequestHeaders()
-Curl::getResponse()
-Curl::getResponseCookie($key)
-Curl::getResponseCookies()
-Curl::getResponseHeaders()
-Curl::getRetries()
-Curl::getRetryDecider()
-Curl::getSuccessCallback()
-Curl::getUrl()
-Curl::getXmlDecoder()
-Curl::head($url, $data = array())
-Curl::isChildOfMultiCurl()
-Curl::isCurlError()
-Curl::isError()
-Curl::isHttpError()
-Curl::options($url, $data = array())
-Curl::patch($url, $data = array())
-Curl::post($url, $data = '', $follow_303_with_post = false)
-Curl::progress($callback)
-Curl::put($url, $data = array())
-Curl::removeHeader($key)
-Curl::reset()
-Curl::search($url, $data = array())
-Curl::setBasicAuthentication($username, $password = '')
-Curl::setConnectTimeout($seconds)
-Curl::setCookie($key, $value)
-Curl::setCookieFile($cookie_file)
-Curl::setCookieJar($cookie_jar)
-Curl::setCookieString($string)
-Curl::setCookies($cookies)
-Curl::setDefaultDecoder($mixed = 'json')
-Curl::setDefaultJsonDecoder()
-Curl::setDefaultTimeout()
-Curl::setDefaultUserAgent()
-Curl::setDefaultXmlDecoder()
-Curl::setDigestAuthentication($username, $password = '')
-Curl::setHeader($key, $value)
-Curl::setHeaders($headers)
-Curl::setJsonDecoder($mixed)
-Curl::setMaxFilesize($bytes)
-Curl::setOpt($option, $value)
-Curl::setOpts($options)
-Curl::setPort($port)
-Curl::setProxy($proxy, $port = null, $username = null, $password = null)
-Curl::setProxyAuth($auth)
-Curl::setProxyTunnel($tunnel = true)
-Curl::setProxyType($type)
-Curl::setReferer($referer)
-Curl::setReferrer($referrer)
-Curl::setRetry($mixed)
-Curl::setTimeout($seconds)
-Curl::setUrl($url, $mixed_data = '')
-Curl::setUserAgent($user_agent)
-Curl::setXmlDecoder($mixed)
-Curl::success($callback)
-Curl::unsetHeader($key)
-Curl::unsetProxy()
-Curl::verbose($on = true, $output = STDERR)
-MultiCurl::__construct($base_url = null)
-MultiCurl::__destruct()
-MultiCurl::addCurl(Curl $curl)
-MultiCurl::addDelete($url, $query_parameters = array(), $data = array())
-MultiCurl::addDownload($url, $mixed_filename)
-MultiCurl::addGet($url, $data = array())
-MultiCurl::addHead($url, $data = array())
-MultiCurl::addOptions($url, $data = array())
-MultiCurl::addPatch($url, $data = array())
-MultiCurl::addPost($url, $data = '', $follow_303_with_post = false)
-MultiCurl::addPut($url, $data = array())
-MultiCurl::addSearch($url, $data = array())
-MultiCurl::beforeSend($callback)
-MultiCurl::close()
-MultiCurl::complete($callback)
-MultiCurl::error($callback)
-MultiCurl::getOpt($option)
-MultiCurl::removeHeader($key)
-MultiCurl::setBasicAuthentication($username, $password = '')
-MultiCurl::setConcurrency($concurrency)
-MultiCurl::setConnectTimeout($seconds)
-MultiCurl::setCookie($key, $value)
-MultiCurl::setCookieFile($cookie_file)
-MultiCurl::setCookieJar($cookie_jar)
-MultiCurl::setCookieString($string)
-MultiCurl::setCookies($cookies)
-MultiCurl::setDigestAuthentication($username, $password = '')
-MultiCurl::setHeader($key, $value)
-MultiCurl::setHeaders($headers)
-MultiCurl::setJsonDecoder($mixed)
-MultiCurl::setOpt($option, $value)
-MultiCurl::setOpts($options)
-MultiCurl::setPort($port)
-MultiCurl::setReferer($referer)
-MultiCurl::setReferrer($referrer)
-MultiCurl::setRetry($mixed)
-MultiCurl::setTimeout($seconds)
-MultiCurl::setUrl($url)
-MultiCurl::setUserAgent($user_agent)
-MultiCurl::setXmlDecoder($mixed)
-MultiCurl::start()
-MultiCurl::success($callback)
-MultiCurl::unsetHeader($key)
-MultiCurl::verbose($on = true, $output = STDERR)
+$arguments = array('id' => 'M107441');
+$response = $client->cancelOrder($arguments);
 ```
 
-### Security
+### Balance
 
-See [SECURITY](https://github.com/php-curl-class/php-curl-class/blob/master/SECURITY.md) for security considerations.
+**Get balance**
 
-### Troubleshooting
+```php
+$response = $client->getBalance();
+```
 
-See [TROUBLESHOOTING](https://github.com/php-curl-class/php-curl-class/blob/master/TROUBLESHOOTING.md) for troubleshooting.
+**Create pay order**
 
-### Run Tests
+```php
+$arguments = array(
+    'to_receive' => '3000',
+    'to_receive_currency' => 'CLP',
+    'payment_receiver' => 'receiver@email.com',
+    'external_id' => '123456CM',
+    'callback_url' => '',
+    'error_url' => '',
+    'success_url' => '',
+    'refund_email' => 'refund@email.com',
+    'language' => ['es','en','pt']
+);
 
-To run tests:
+$response = $client->createPayOrder($arguments);  
+```
 
-    $ git clone https://github.com/php-curl-class/php-curl-class.git
-    $ cd php-curl-class/
-    $ composer update
-    $ ./tests/run.sh
+### Pay orders
 
-### Contribute
-1. Check for open issues or open a new issue to start a discussion around a bug or feature.
-1. Fork the repository on GitHub to start making your changes.
-1. Write one or more tests for the new feature or that expose the bug.
-1. Make code changes to implement the feature or fix the bug.
-1. Send a pull request to get your changes merged and published.
+**Get pay order**
+
+```php
+$arguments = array('id' => 'P13565');
+$response = $client->getPayOrder($arguments);  
+```
+
+**Get pay orders**
+
+```php
+$arguments = array('start_date' => '1/05/2018','end_date' => '31/05/2018');
+$response = $client->getPayOrders($arguments);  
+```
+
+## Contributing and testing
+
+The test suite is built using PHPUnit. Run the suite of unit tests by running
+the `phpunit` command.
+
+```
+phpunit
+```
+
+[1]: https://developers.cryptomkt.com
