@@ -3,7 +3,7 @@
     "description": "CryptoMarket Curl PHP makes it easy integrate with CryptoMarket APIs.",
     "homepage": "https://github.com/cryptomkt/cryptomkt-curl-php",
     "license": "MIT",
-    "typw": "git",
+    "type": "git",
     "keywords": [
         "php", "curl", "class", "cryptomarket", "cryptocompra", "ethereum", "stellar",
         "lumen", "bitcoin", "altcoins", "cryptocurrencies", "payment"
@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3",
+        "php": ">=7.2",
         "ext-curl": "*",
         "ext-mbstring": "*"
     },
