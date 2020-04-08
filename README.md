@@ -1,5 +1,5 @@
 # CryptoMarket API v1 PHP Client
-[![N|CryptoMarket](https://www.cryptomkt.com/static/principal/img/logotipo-bld.png)](https://www.cryptomkt.com/)
+[![N|CryptoMarket](https://static.cryptomkt.com/static/global/assets/images/cmkt-blanc.png)](https://www.cryptomkt.com/)
 
 PHP library [CryptoMarket API v1][1] to integrate CryptoMarket API into your
 PHP project.
